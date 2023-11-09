@@ -1,81 +1,121 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
 
-namespace Car_Parking
+// Container-Klasse zur Darstellung von Containern
+class Container
 {
-    public partial class Form1 : Form
+    public string ContainerNumber { get; set; }
+    public string Destination { get; set; }
+    public int Weight { get; set; }
+}
+
+// Hafen-Klasse zur Verwaltung des Hafenbetriebs
+class Port
+{
+    private List<Container> storage = new List<Container>();
+
+    // Methode zum Be- und Entladen von Containern
+    public void LoadContainer(Container container)
     {
-        public Form1()
+        storage.Add(container);
+        Console.WriteLine($"Container {container.ContainerNumber} wurde geladen.");
+    }
+
+    public void UnloadContainer(Container container)
+    {
+        if (storage.Contains(container))
         {
-            InitializeComponent();
+            storage.Remove(container);
+            Console.WriteLine($"Container {container.ContainerNumber} wurde entladen.");
         }
-
-        private void button1_Click(object sender, EventArgs e)
+        else
         {
-            //Add
-            StreamWriter sr = new StreamWriter("a.txt", true);
-            
-            sr.WriteLine(textBox1.Text);
-            sr.WriteLine(textBox2.Text);
-            sr.WriteLine(textBox3.Text);
-            sr.WriteLine(textBox4.Text);
-
-            sr.Close();
-
-            textBox1.Text = "";
-            textBox2.Text = "";
-            textBox3.Text = "";
-            textBox4.Text = "";
-
+            Console.WriteLine($"Container {container.ContainerNumber} nicht gefunden.");
         }
+    }
 
-        private void button2_Click(object sender, EventArgs e)
+    // Methode zur Anzeige des aktuellen Lagerbestands
+    public void DisplayInventory()
+    {
+        Console.WriteLine("Aktueller Lagerbestand:");
+        foreach (var container in storage)
         {
-            //List
-            StreamReader sr = new StreamReader("a.txt");
+            Console.WriteLine($"Container: {container.ContainerNumber}, Ziel: {container.Destination}, Gewicht: {container.Weight} kg");
+        }
+    }
+}
 
-            while (!sr.EndOfStream)
+class Program
+{
+    static void Main(string[] args)
+    {
+        Port port = new Port();
+
+        while (true)
+        {
+            Console.WriteLine("1. Container laden");
+            Console.WriteLine("2. Container entladen");
+            Console.WriteLine("3. Lagerbestand anzeigen");
+            Console.WriteLine("4. Beenden");
+
+            int choice;
+            if (!int.TryParse(Console.ReadLine(), out choice))
             {
-                listBox1.Items.Add(sr.ReadLine() + " , " + sr.ReadLine() + " , " + sr.ReadLine() + " , " + sr.ReadLine());
+                Console.WriteLine("Ungültige Eingabe. Bitte geben Sie eine Zahl zwischen 1 und 4 ein.");
+                continue;
             }
 
-            sr.Close();
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            //Search
-            StreamReader sr = new StreamReader("a.txt");
-
-            listBox2.Items.Clear();
-
-            while (!sr.EndOfStream)
+            switch (choice)
             {
-                string s = sr.ReadLine();
-                if (s == textBox5.Text)
-                {
-                    listBox2.Items.Add(sr.ReadLine() + " , " + s + " , " + sr.ReadLine() + " , " + sr.ReadLine());
-                }
-                else
-                {
-                    sr.ReadLine();
-                    sr.ReadLine();
-                    sr.ReadLine();
-                }
+                case 1:
+                    Console.WriteLine("Container-Nummer eingeben:");
+                    string containerNumber = Console.ReadLine();
+                    Console.WriteLine("Ziel eingeben:");
+                    string destination = Console.ReadLine();
+                    Console.WriteLine("Gewicht eingeben:");
+                    if (!int.TryParse(Console.ReadLine(), out int weight))
+                    {
+                        Console.WriteLine("Ungültiges Gewicht. Bitte geben Sie eine ganze Zahl ein.");
+                        continue;
+                    }
+
+                    Container container = new Container
+                    {
+                        ContainerNumber = containerNumber,
+                        Destination = destination,
+                        Weight = weight
+                    };
+
+                    port.LoadContainer(container);
+                    break;
+
+                case 2:
+                    Console.WriteLine("Container-Nummer eingeben:");
+                    string containerToRemove = Console.ReadLine();
+
+                    Container containerToUnload = port.storage.Find(c => c.ContainerNumber == containerToRemove);
+                    if (containerToUnload != null)
+                    {
+                        port.UnloadContainer(containerToUnload);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Container nicht gefunden.");
+                    }
+                    break;
+
+                case 3:
+                    port.DisplayInventory();
+                    break;
+
+                case 4:
+                    Console.WriteLine("Programm wird beendet.");
+                    return;
+
+                default:
+                    Console.WriteLine("Ungültige Auswahl. Bitte geben Sie eine Zahl zwischen 1 und 4 ein.");
+                    break;
             }
         }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start("http://WWw.SourceCodes.ir");
-        }
-
-
     }
 }
